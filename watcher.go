@@ -9,6 +9,8 @@ import (
 )
 
 type Event struct {
+	ID      string
+	Name    string
 	Payload string
 }
 
