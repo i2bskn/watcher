@@ -9,12 +9,17 @@ import (
 )
 
 type Event struct {
-	ID      string
-	Name    string
-	Payload string
+	ID            string
+	Name          string
+	Payload       string
+	OriginPayload string
 }
 
 func (e Event) ParsedPayload() string {
+	if len(e.OriginPayload) > 0 {
+		return e.OriginPayload
+	}
+
 	payload, _ := base64.StdEncoding.DecodeString(e.Payload)
 	return string(payload)
 }
@@ -26,12 +31,10 @@ func ProcessWithEvents(fn func([]Event) error) error {
 	for scanner.Scan() {
 		var events []Event
 		if err := json.Unmarshal(scanner.Bytes(), &events); err != nil {
-			log.Println("Parse events:", err)
-			return err
+			events = append(events, Event{OriginPayload: string(scanner.Bytes())})
 		}
 
 		if err := fn(events); err != nil {
-			log.Println("Processing consul events:", err)
 			return err
 		}
 	}

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func reload(events []watcher.Event) error {
+func systemctl(events []watcher.Event) error {
 	for _, event := range events {
 		params, err := parsePayload(event.ParsedPayload())
 		if err != nil {
@@ -23,7 +23,8 @@ func reload(events []watcher.Event) error {
 			return err
 		}
 
-		log.Println(out)
+		log.Println(string(out))
+		log.Println("Operation successfully completed")
 	}
 	return nil
 }
@@ -31,12 +32,12 @@ func reload(events []watcher.Event) error {
 func parsePayload(payload string) ([]string, error) {
 	params := strings.Split(payload, ":")
 	if len(params) != 2 {
-		return []string{}, fmt.Errorf("Invalid payload: %v", params)
+		return []string{}, fmt.Errorf("Invalid payload: %v", payload)
 	}
 
 	return params, nil
 }
 
 func main() {
-	watcher.ProcessWithEvents(reload)
+	watcher.ProcessWithEvents(systemctl)
 }
