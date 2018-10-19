@@ -34,6 +34,7 @@ func ProcessWithEvents(fn func([]Event) error) error {
 			events = append(events, Event{OriginPayload: string(scanner.Bytes())})
 		}
 
+		log.Println("Reveive events:", events)
 		if err := fn(events); err != nil {
 			return err
 		}
@@ -44,5 +45,6 @@ func ProcessWithEvents(fn func([]Event) error) error {
 		return err
 	}
 
+	log.Println("Event process finished successfully.")
 	return nil
 }

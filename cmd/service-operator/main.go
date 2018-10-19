@@ -26,6 +26,7 @@ func systemctl(events []watcher.Event) error {
 		log.Println(string(out))
 		log.Println("Operation successfully completed")
 	}
+
 	return nil
 }
 
