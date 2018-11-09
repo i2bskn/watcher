@@ -9,7 +9,9 @@ import (
 )
 
 func systemctl(events []watcher.Event) error {
-	for _, event := range events {
+	if len(events) > 0 {
+		event := events[0]
+
 		params, err := parsePayload(event.ParsedPayload())
 		if err != nil {
 			log.Println("Parsing payload:", err)
