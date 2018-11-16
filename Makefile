@@ -5,7 +5,7 @@ ARCHIVE_PATH := $(WORKING_PATH)/$(ARCHIVE_NAME)
 ARCHIVE_FILE := $(ARCHIVE_PATH).tar.gz
 
 
-.PHONY: clean
+.PHONY: build install clean
 
 cmd/service-operator/service-operator:
 	cd cmd/service-operator && go build
