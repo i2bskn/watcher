@@ -8,43 +8,56 @@ import (
 	"os"
 )
 
-type Event struct {
+type ConsulEvent struct {
 	ID            string
 	Name          string
 	Payload       string
-	OriginPayload string
+	NodeFilter    string
+	ServiceFilter string
+	TagFilter     string
+	Version       int
+	LTime         int
 }
 
-func (e Event) ParsedPayload() string {
-	if len(e.OriginPayload) > 0 {
-		return e.OriginPayload
-	}
-
+func (e ConsulEvent) ParsedPayload() string {
 	payload, _ := base64.StdEncoding.DecodeString(e.Payload)
 	return string(payload)
 }
 
-func ProcessWithEvents(fn func([]Event) error) error {
-	log.Println("Waiting for events from STDIN...")
-
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		var events []Event
-		if err := json.Unmarshal(scanner.Bytes(), &events); err != nil {
-			events = append(events, Event{OriginPayload: string(scanner.Bytes())})
-		}
-
-		log.Println("Reveive events:", events)
-		if err := fn(events); err != nil {
-			return err
-		}
+func Process(fn func(string) error) error {
+	payload, err := parseInput()
+	if err != nil {
+		return err
 	}
 
-	if err := scanner.Err(); err != nil {
-		log.Println("Reading STDIN:", err)
+	if err := fn(payload); err != nil {
 		return err
 	}
 
 	log.Println("Event process finished successfully.")
 	return nil
+}
+
+func parseInput() (string, error) {
+	log.Println("Waiting for events from STDIN...")
+
+	scanner := bufio.NewScanner(os.Stdin)
+	var payload string
+	for scanner.Scan() {
+		if os.Getenv("CONSUL_INDEX") != "" {
+			var events []ConsulEvent
+			if err := json.Unmarshal(scanner.Bytes(), &events); err != nil {
+				return "", err
+			}
+
+			event := events[len(events)-1]
+			log.Println("Reveive event:", event)
+
+			payload = event.ParsedPayload()
+		} else {
+			payload = string(scanner.Bytes())
+		}
+	}
+
+	return payload, nil
 }
