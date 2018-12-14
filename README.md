@@ -12,20 +12,11 @@ import (
 	"log"
 )
 
-func eventProcess(events []watcher.Event) error {
-	for _, event := range events {
-		log.Println("Receive Payload:", event.ParsedPayload())
-	}
+func eventProcess(payload string) error {
+	log.Println("Receive Payload:", payload)
 }
 
 func main() {
-	watcher.ProcessWithEvents(eventProcess)
+	watcher.Process(eventProcess)
 }
-```
-
-## service-operator
-
-```
-GOOS=linux GOARCH=amd64 make install
-echo reload:nginx | service-operator // Execute `systemctl reload nginx`
 ```
