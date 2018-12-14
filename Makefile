@@ -1,23 +1,32 @@
-INSTALL_PATH := /usr/local/bin
-WORKING_PATH := /tmp
-ARCHIVE_NAME := watchers
-ARCHIVE_PATH := $(WORKING_PATH)/$(ARCHIVE_NAME)
-ARCHIVE_FILE := $(ARCHIVE_PATH).tar.gz
+INSTALL_PATH ?= /usr/local/bin
+OUT_PATH     ?= out
+PKG_NAME     := watchers
+PKG_VERSION  ?= $(shell date +%Y%m%d)
+PKG_PATH     := $(PKG_NAME)-$(PKG_VERSION)
+PKG_TAR_PATH := $(PKG_PATH).tar.gz
+BUILD_OS     ?= linux
+BUILD_ARCH   ?= amd64
+CMD_PATHS    := $(wildcard cmd/*)
+CMD_FILES    := $(foreach path, $(CMD_PATHS), $(path)/$(notdir $(path)))
 
+.PHONY: build tar install clean
 
-.PHONY: build install clean
+$(PKG_TAR_PATH): $(CMD_FILES)
+	rm -rf $(OUT_PATH)/$(PKG_PATH) $(OUT_PATH)/$(PKG_TAR_PATH)
+	mkdir -p $(OUT_PATH)/$(PKG_PATH)
+	$(foreach file, $(CMD_FILES), cp $(file) $(OUT_PATH)/$(PKG_PATH))
+	cd $(OUT_PATH) && tar zcvf $(PKG_TAR_PATH) $(PKG_PATH)
 
-cmd/service-operator/service-operator:
-	cd cmd/service-operator && go build
+$(CMD_FILES):
+	$(foreach path, $(CMD_PATHS), cd $(path) && GOOS=$(BUILD_OS) GOARCH=$(BUILD_ARCH) go build)
 
-build: cmd/service-operator/service-operator
-	rm -rf $(ARCHIVE_PATH) $(ARCHIVE_FILE)
-	mkdir -p $(ARCHIVE_PATH)
-	mv cmd/service-operator/service-operator $(ARCHIVE_PATH)
-	cd $(WORKING_PATH) && tar zcvf $(ARCHIVE_FILE) $(ARCHIVE_NAME)
+build: $(CMD_FILES)
 
-install: cmd/service-operator/service-operator
-	install cmd/service-operator/service-operator $(INSTALL_PATH)
+tar: $(PKG_TAR_PATH)
 
 clean:
-	rm -f cmd/service-operator/service-operator
+	$(foreach file, $(CMD_FILES), rm -f $(file))
+	rm -rf $(OUT_PATH)
+
+install: $(CMD_FILES)
+	$(foreach file, $(CMD_FILES), install $(file) $(INSTALL_PATH))
