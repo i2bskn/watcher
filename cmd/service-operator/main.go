@@ -1,12 +1,18 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
 
 	"github.com/i2bskn/watcher"
+)
+
+const (
+	Version = "20181221"
 )
 
 func systemctl(payload string) error {
@@ -29,6 +35,15 @@ func systemctl(payload string) error {
 }
 
 func main() {
+	var printVersion bool
+	flag.BoolVar(&printVersion, "version", false, "Print version")
+	flag.Parse()
+
+	if printVersion {
+		fmt.Println("service-operator", Version)
+		os.Exit(0)
+	}
+
 	if err := watcher.Process(systemctl); err != nil {
 		log.Fatal(err)
 	}

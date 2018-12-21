@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 )
@@ -50,14 +51,22 @@ func parseInput() (string, error) {
 				return "", err
 			}
 
-			event := events[len(events)-1]
-			log.Println("Reveive event:", event)
+			eventCount := len(events)
+			if eventCount == 0 {
+				return "", errors.New("Received events is empty.")
+			}
+
+			eventIdx := eventCount - 1
+			event := events[eventIdx]
+			log.Println("Reveive event:", event.ID)
 
 			payload = event.ParsedPayload()
 		} else {
 			payload = string(scanner.Bytes())
 		}
 	}
+
+	log.Println("Parse payload:", payload)
 
 	return payload, nil
 }
