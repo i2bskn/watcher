@@ -31,6 +31,11 @@ func Process(fn func(string) error) error {
 		return err
 	}
 
+	if len(payload) == 0 {
+		log.Println("Received events is empty.")
+		return nil
+	}
+
 	if err := fn(payload); err != nil {
 		return err
 	}
@@ -51,13 +56,11 @@ func parseInput() (string, error) {
 				return "", err
 			}
 
-			eventCount := len(events)
-			if eventCount == 0 {
-				return "", errors.New("Received events is empty.")
+			if len(events) == 0 {
+				return "", nil
 			}
 
-			eventIdx := eventCount - 1
-			event := events[eventIdx]
+			event := events[len(events)]
 			log.Println("Reveive event:", event.ID)
 
 			payload = event.ParsedPayload()
