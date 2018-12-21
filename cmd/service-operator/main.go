@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	Version = "20181221"
+	Version = "v0.0.1"
 )
 
 func systemctl(payload string) error {
@@ -28,7 +28,10 @@ func systemctl(payload string) error {
 		return err
 	}
 
-	log.Println(string(out))
+	output := string(out)
+	if len(output) > 0 {
+		log.Println(output)
+	}
 	log.Println("Operation successfully completed")
 
 	return nil

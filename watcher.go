@@ -59,7 +59,7 @@ func parseInput() (string, error) {
 				return "", nil
 			}
 
-			event := events[len(events)]
+			event := events[len(events)-1]
 			log.Println("Reveive event:", event.ID)
 
 			payload = event.ParsedPayload()
